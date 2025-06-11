@@ -25,24 +25,32 @@ while true; do
       echo ""
       read -p "Press enter to continue..."
       ;;
+      
+      
     2)
       echo -e "\n💾   Disk Usage:"
       df -h #Displays free disk space in human readable form.
       echo ""
       read -p "Press enter to continue..."
       ;;
+      
+      
     3)
       echo -e "\n🌐   Testing internet connectivity..."
       ping -c 3 8.8.8.8 && echo "✅  Connected!" || echo "❌  No internet connection."
       echo ""
       read -p "Press enter to continue..."
       ;;
+      
+      
     4)
       echo -e "\n🧹 Cleaning system cache..."
       sudo rm -rf /Library/Caches/* ~/Library/Caches/*
       echo "✅ Cache cleaned successfully for the permitted files."
       read -p "Press enter to continue..."
       ;;
+      
+      
     5)
       echo -e "\n📦 Creating system backup..."
       BACKUP_NAME="sys_backup_$(date +%Y%m%d_%H%M%S).tar.gz"
@@ -50,11 +58,60 @@ while true; do
       echo "✅ Backup saved as $BACKUP_NAME"
       read -p "Press enter to continue..."
       ;;
-    6)
-      echo -e "\n🕵️ Viewing latest system logs..."
-      sudo tail -n 100 /var/log/system.log 	#Displays the last 100 lines in the system logs.
+      
+     
+     6)
+      echo -e "\n🕵️ Choose log to view:"
+      echo "1. System log (/var/log/system.log)"
+      echo "2. Install log (/private/var/log/install.log)"
+      echo "3. App log (User DiagnosticReports)"
+      echo "4. Search system log for keyword"
+      echo "5. Back"
+      read -p "Select an option [1-5]: " log_option
+
+      case $log_option in
+        1)
+          echo -e "\n🔍 Last 20 lines of system log:"
+          sudo tail -n 20 /var/log/system.log
+          ;;
+        2)
+          echo -e "\n🧰 Last 20 lines of install log:"
+          sudo tail -n 20 /private/var/log/install.log
+          ;;
+        3)
+          echo -e "\n📄 Recent app crash logs:"
+          ls -lt ~/Library/Logs/DiagnosticReports | head -n 5
+          ;;
+        4)
+		  while true; do
+	      read -p "Enter keyword to search (or 'q' to quit): " keyword
+        
+	      # Check if user wants to quit
+	      if [[ "$keyword" == "q" ]]; then
+            break
+	      fi
+        
+	      echo -e "\nSearching system.log for \"$keyword\":\n"
+        
+	      # Perform the search with context and color highlighting
+	      sudo grep -i -A 2 -B 2 --color=auto "$keyword" /var/log/system.log || echo "No matches found for \"$keyword\""
+	      count=$(sudo grep -i -c "$keyword" /var/log/system.log)
+		  echo "Found $count matches for \"$keyword\""
+        
+	      echo -e "\n----------------------------------------\n"
+		  done
+		  ;;        
+		5)
+          echo "Returning to main menu..."
+          ;;
+        *)
+          echo "Invalid selection."
+          ;;
+      esac
+
       read -p "Press enter to continue..."
       ;;
+
 
     *)
       echo "Invalid option. Try again."

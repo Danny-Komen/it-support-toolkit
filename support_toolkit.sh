@@ -122,7 +122,7 @@ while true; do
 	 while true; do
       clear
       echo "🧠 Advanced TOOLS"
-      echo "1. Top 5 RAM-Heavy Apps"
+      echo "1. Top 10 RAM-Heavy Apps"
       echo "2. Analyze Last Boot Time"
       echo "3. Open Ports and Services"
       echo "4. Back"
@@ -167,8 +167,8 @@ while true; do
      	
         3)
           echo -e "\n🌐 Open Ports & Listening Services:"
-          echo "⏳ Scanning for active TCP listeners..."
 
+          echo "⏳ Scanning for active TCP listeners..."
           if sudo lsof -nP -iTCP -sTCP:LISTEN | grep -q "LISTEN"; then
             echo -e "\n📡 Active TCP Listening Ports:"
             sudo lsof -nP -iTCP -sTCP:LISTEN | awk 'NR==1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9} NR>1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9}'
@@ -177,7 +177,43 @@ while true; do
           fi
 
           echo ""
-          read -p "Press enter to continue..."
+          echo "⏳ Scanning for active UDP listeners..."
+          if sudo lsof -nP -iUDP | grep -q "UDP"; then
+            echo -e "\n📡 Active UDP Listening Ports:"
+            sudo lsof -nP -iUDP | awk 'NR==1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9} NR>1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9}'
+          else
+            echo -e "\n✅ No active listening UDP ports found. Your system is secure."
+          fi
+
+          echo ""
+          echo "⏳ Scanning for active IPv6 TCP listeners..."
+          if sudo lsof -nP -iTCP -sTCP:LISTEN | grep IPv6 | grep -q "LISTEN"; then
+            echo -e "\n📡 Active IPv6 TCP Listening Ports:"
+            sudo lsof -nP -iTCP -sTCP:LISTEN | grep IPv6 | awk 'NR==1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9} NR>1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9}'
+          else
+            echo -e "\n✅ No active listening IPv6 TCP ports found. Your system is secure."
+          fi
+          
+          echo ""
+          echo "⏳ Scanning for active IPv6 UDP listeners..."
+          if sudo lsof -nP -iUDP | grep IPv6 | grep -q "UDP"; then
+            echo -e "\n📡 Active IPv6 UDP Listening Ports:"
+            sudo lsof -nP -iUDP | grep IPv6 | awk 'NR==1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9} NR>1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9}'
+          else
+            echo -e "\n✅ No active listening IPv6 UDP ports found. Your system is secure."
+          fi
+
+          echo ""
+          echo "⏳ Scanning for active UNIX sockets..."
+          if sudo lsof -nP -U | grep -q "unix"; then
+            echo -e "\n📡 Active UNIX Sockets:"
+            sudo lsof -nP -U | awk 'NR==1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9} NR>1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9}'
+          else
+            echo -e "\n✅ No active UNIX sockets found."
+          fi
+
+          echo ""
+          echo "🔍 Scanning for active services..."
           ;;
 
           	

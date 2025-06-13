@@ -13,9 +13,10 @@ while true; do
   	echo "4. Clean System Cache"
   	echo "5. Create System Backup"
   	echo "6. View System Logs"
-  	echo "7. Exit"
+  	echo "7. Advanced Tools"
+  	echo "8. Exit"
  	echo "------------------------------"
-  	read -p "Choose an option [1-7]: " option
+  	read -p "Choose an option [1-8]: " option
 
   case $option in
     1)
@@ -112,6 +113,36 @@ while true; do
       read -p "Press enter to continue..."
       ;;
 
+	 7)
+	 while true; do
+      clear
+      echo "🧠 Advanced TOOLS"
+      echo "1. Top 5 RAM-Heavy Apps"
+      echo "2. Back"
+      read -p "Choose an option [1-2]: " expertopt
+      
+      if [[ $expertopt == 2 ]]
+      then
+      	break
+      fi
+
+      case $expertopt in
+        1)
+          echo -e "\n📈 Top 10 Memory-Heavy Apps:"
+          echo -e "\n PID	||	App	||		%"
+          ps aux | sort -nrk 4 | head -n 10| awk '{printf "%-10s %-20s %s%%\n", $2, $11, $4}'
+          ;;
+        2)
+          echo "Returning to main menu..."
+          break
+          ;;
+        *)
+          echo "Invalid option."
+          ;;
+      esac
+      read -p "Press enter to continue..."
+      done
+      ;;
 
     *)
       echo "Invalid option. Try again."

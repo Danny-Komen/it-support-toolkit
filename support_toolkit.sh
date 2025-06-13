@@ -17,6 +17,11 @@ while true; do
   	echo "8. Exit"
  	echo "------------------------------"
   	read -p "Choose an option [1-8]: " option
+  	
+  	if [[ $option == 8 ]]
+  	then
+  		break
+  	fi
 
   case $option in
     1)
@@ -118,10 +123,12 @@ while true; do
       clear
       echo "🧠 Advanced TOOLS"
       echo "1. Top 5 RAM-Heavy Apps"
-      echo "2. Back"
-      read -p "Choose an option [1-2]: " expertopt
+      echo "2. Analyze Last Boot Time"
+      echo "3. Open Ports and Services"
+      echo "4. Back"
+      read -p "Choose an option [1-4]: " expertopt
       
-      if [[ $expertopt == 2 ]]
+      if [[ $expertopt == 4 ]]
       then
       	break
       fi
@@ -132,10 +139,48 @@ while true; do
           echo -e "\n PID	||	App	||		%"
           ps aux | sort -nrk 4 | head -n 10| awk '{printf "%-10s %-20s %s%%\n", $2, $11, $4}'
           ;;
+          
         2)
-          echo "Returning to main menu..."
-          break
+          echo -e "\n🐢 Slow Boot Summary:"
+          echo "⏳ Please wait... This might take upto a minute ⌛️"
+
+          # Last reboot
+          echo -n "🕓 Last Boot:        "
+          sysctl -n kern.boottime | awk -F'[ =,}]+' '{print $7, $8, $9, $10, $11}'
+
+          # Previous shutdown cause
+          cause=$(log show --predicate 'eventMessage contains[c] "Previous shutdown cause"' --last 1d | tail -n 1 | grep -oE 'cause: -?[0-9]+')
+          code=$(echo "$cause" | awk '{print $2}')
+          case $code in
+            -3) meaning="Hard shutdown / Power loss" ;;
+            -128) meaning="Kernel panic" ;;
+            5) meaning="Normal shutdown" ;;
+            *) meaning="Unknown or system-defined ($code)" ;;
+          esac
+          echo -e "📌 Shutdown Cause:   $code ($meaning)"
+
+          # Uptime
+          echo -n "⏱️ Uptime:           "
+          uptime | awk -F'(up |, [0-9]+ users)' '{print $2}'
+
           ;;
+     	
+        3)
+          echo -e "\n🌐 Open Ports & Listening Services:"
+          echo "⏳ Scanning for active TCP listeners..."
+
+          if sudo lsof -nP -iTCP -sTCP:LISTEN | grep -q "LISTEN"; then
+            echo -e "\n📡 Active TCP Listening Ports:"
+            sudo lsof -nP -iTCP -sTCP:LISTEN | awk 'NR==1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9} NR>1 {printf "%-10s %-8s %-10s %-30s\n", $1, $2, $3, $9}'
+          else
+            echo -e "\n✅ No active listening TCP ports found. Your system is secure."
+          fi
+
+          echo ""
+          read -p "Press enter to continue..."
+          ;;
+
+          	
         *)
           echo "Invalid option."
           ;;
